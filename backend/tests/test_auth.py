@@ -117,3 +117,20 @@ def test_get_me_unauthorized_with_invalid_token(client: TestClient):
         headers={"Authorization": "Bearer invalid.token.value"},
     )
     assert response.status_code == 401
+
+
+def test_login_rate_limiting_exceeded(client: TestClient):
+    """Test that exceeding 10 requests per minute triggers 429 Too Many Requests."""
+    login_payload = {
+        "email": "ratelimit@example.com",
+        "password": "wrongpassword",
+    }
+    # First 10 requests are processed (and fail with 401 for bad password)
+    for _ in range(10):
+        res = client.post("/auth/login", json=login_payload)
+        assert res.status_code == 401
+
+    # The 11th request must be rejected by the rate limiter with 429
+    res_exceeded = client.post("/auth/login", json=login_payload)
+    assert res_exceeded.status_code == 429
+

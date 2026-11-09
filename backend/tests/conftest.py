@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base, get_db
+from app.core.limiter import limiter
 from app.main import app
 
 # In-memory SQLite database with StaticPool ensures all connections share the same memory DB
@@ -29,8 +30,10 @@ TestingSessionLocal = sessionmaker(
 def setup_tables():
     """Create fresh schema for each test function and drop afterward."""
     Base.metadata.create_all(bind=test_engine)
+    limiter.reset()
     yield
     Base.metadata.drop_all(bind=test_engine)
+    limiter.reset()
 
 
 @pytest.fixture

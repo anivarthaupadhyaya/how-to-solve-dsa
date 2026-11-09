@@ -1,10 +1,11 @@
 """Authentication router for user registration and login."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.core.limiter import limiter
 from app.core.security import get_password_hash, verify_password, create_access_token
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, UserRead, Token
@@ -18,7 +19,9 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
 )
+@limiter.limit("10/minute")
 def register_user(
+    request: Request,
     user_in: UserCreate,
     db: Session = Depends(get_db),
 ) -> User:
@@ -46,7 +49,9 @@ def register_user(
     response_model=Token,
     summary="Authenticate user and issue JWT access token",
 )
+@limiter.limit("10/minute")
 def login_user(
+    request: Request,
     credentials: UserLogin,
     db: Session = Depends(get_db),
 ) -> Token:
