@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     # JWT Authentication
     JWT_SECRET: str = "default_jwt_secret_key_change_in_production"
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60  # 60 minutes access token expiry
 
     # CORS settings: comma-separated string or list of origins
     CORS_ORIGINS: Union[List[str], str] = [
