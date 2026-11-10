@@ -5,7 +5,7 @@ STACK
 - Frontend: React + Vite (JavaScript/JSX), Tailwind CSS, React Router, axios, Recharts, framer-motion, lucide-react, sonner (toasts).
 - Local dev: Docker Compose for MySQL. All config via environment variables, never hardcoded.
 
-SCHEMA
+SCHEMA 
 - users(id, email, password_hash, created_at)
 - subjects(id, user_id, name, color)
 - items(id, subject_id, type['problem'|'qa'], title, prompt, answer, url, difficulty)
