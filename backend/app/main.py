@@ -8,6 +8,7 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.routers.auth import router as auth_router
+from app.routers.subjects import router as subjects_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -30,6 +31,7 @@ if settings.CORS_ORIGINS:
 
 # Include API routers
 app.include_router(auth_router)
+app.include_router(subjects_router)
 
 
 @app.get("/health", tags=["Health"])

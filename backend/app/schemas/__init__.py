@@ -8,6 +8,12 @@ from app.schemas.user import (
     Token,
     TokenPayload,
 )
+from app.schemas.subject import (
+    SubjectBase,
+    SubjectCreate,
+    SubjectUpdate,
+    SubjectRead,
+)
 
 __all__ = [
     "UserBase",
@@ -16,4 +22,8 @@ __all__ = [
     "UserRead",
     "Token",
     "TokenPayload",
+    "SubjectBase",
+    "SubjectCreate",
+    "SubjectUpdate",
+    "SubjectRead",
 ]
