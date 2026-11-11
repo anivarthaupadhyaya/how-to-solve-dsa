@@ -59,3 +59,24 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+def make_auth_headers(client: TestClient, email: str) -> dict:
+    """Helper to register and login a test user, returning auth Bearer header."""
+    client.post("/auth/register", json={"email": email, "password": "testpassword123"})
+    login_res = client.post("/auth/login", json={"email": email, "password": "testpassword123"})
+    token = login_res.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def user_a_headers(client: TestClient) -> dict:
+    """Authentication headers for test User A."""
+    return make_auth_headers(client, "user_a@example.com")
+
+
+@pytest.fixture
+def user_b_headers(client: TestClient) -> dict:
+    """Authentication headers for test User B."""
+    return make_auth_headers(client, "user_b@example.com")
+
