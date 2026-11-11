@@ -7,6 +7,7 @@ import {
   BookOpen,
   Sparkles,
 } from 'lucide-react'
+import { useSubjects } from '../../context/SubjectsContext'
 
 const navLinks = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -15,14 +16,16 @@ const navLinks = [
   { name: 'Subjects', path: '/subjects', icon: BookOpen },
 ]
 
-// Mock/Default subjects to display color dots in sidebar before API load
-const defaultSubjectDots = [
-  { name: 'DSA', color: '#8B5CF6' },
-  { name: 'OS', color: '#3B82F6' },
-  { name: 'CN', color: '#10B981' },
-]
+export function Sidebar({ subjects: propSubjects }) {
+  let contextSubjects = []
+  try {
+    const ctx = useSubjects()
+    contextSubjects = ctx.subjects || []
+  } catch {
+    // Rendered outside SubjectsProvider
+  }
 
-export function Sidebar({ subjects = defaultSubjectDots }) {
+  const subjects = propSubjects || (contextSubjects.length > 0 ? contextSubjects : [])
   return (
     <>
       {/* Desktop Sidebar */}
@@ -138,3 +141,4 @@ export function Sidebar({ subjects = defaultSubjectDots }) {
     </>
   )
 }
+

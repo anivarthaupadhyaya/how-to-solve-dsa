@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
+import { SubjectsProvider } from './context/SubjectsContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
 import DashboardPage from './pages/DashboardPage'
@@ -17,8 +18,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Toaster richColors position="top-right" />
-        <BrowserRouter>
+        <SubjectsProvider>
+          <Toaster richColors position="top-right" />
+          <BrowserRouter>
           <Routes>
             {/* Public Auth Routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -44,7 +46,8 @@ export default function App() {
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
-  )
+      </SubjectsProvider>
+    </AuthProvider>
+  </ThemeProvider>
+)
 }
