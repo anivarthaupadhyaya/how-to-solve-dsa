@@ -14,6 +14,18 @@ from app.schemas.subject import (
     SubjectUpdate,
     SubjectRead,
 )
+from app.schemas.tag import (
+    TagBase,
+    TagCreate,
+    TagRead,
+)
+from app.schemas.item import (
+    ItemBase,
+    ItemCreate,
+    ItemUpdate,
+    ItemRead,
+    UserItemStateRead,
+)
 
 __all__ = [
     "UserBase",
@@ -26,4 +38,12 @@ __all__ = [
     "SubjectCreate",
     "SubjectUpdate",
     "SubjectRead",
+    "TagBase",
+    "TagCreate",
+    "TagRead",
+    "ItemBase",
+    "ItemCreate",
+    "ItemUpdate",
+    "ItemRead",
+    "UserItemStateRead",
 ]
