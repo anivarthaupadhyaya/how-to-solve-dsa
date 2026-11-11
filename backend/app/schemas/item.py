@@ -55,3 +55,18 @@ class ItemRead(ItemBase):
     user_item: Optional[UserItemStateRead] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class RowError(BaseModel):
+    """Details of a failed row during CSV import."""
+    row: int = Field(..., description="Line number of the failed row (1-indexed)")
+    reason: str = Field(..., description="Error explanation")
+
+
+class ImportSummaryResponse(BaseModel):
+    """Summary of bulk CSV import results."""
+    created: int = Field(..., description="Number of items successfully created")
+    skipped: int = Field(..., description="Number of rows skipped due to errors")
+    errors: List[RowError] = Field(default_factory=list, description="Per-row error details")
+    items: List[ItemRead] = Field(default_factory=list, description="List of created items")
+

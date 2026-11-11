@@ -1,8 +1,11 @@
 """Items router for card CRUD operations with ownership checks and query filters."""
 
+import csv
 from datetime import date
+import io
+import re
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
@@ -12,7 +15,13 @@ from app.models.review import UserItem
 from app.models.subject import Subject
 from app.models.tag import Tag
 from app.models.user import User
-from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
+from app.schemas.item import (
+    ImportSummaryResponse,
+    ItemCreate,
+    ItemRead,
+    ItemUpdate,
+    RowError,
+)
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
@@ -146,6 +155,131 @@ def create_item(
     db.refresh(item)
 
     return serialize_item(item, current_user.id)
+
+
+@router.post(
+    "/import",
+    response_model=ImportSummaryResponse,
+    summary="Bulk import items into a subject from a CSV file",
+)
+def import_items(
+    subject_id: int = Form(..., description="Target subject ID to import into"),
+    file: UploadFile = File(..., description="CSV file with columns: type,title,prompt,answer,url,difficulty,tags"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Bulk import items from CSV, validating per-row data and returning an import summary."""
+    # Enforce subject ownership
+    subject = (
+        db.query(Subject)
+        .filter(Subject.id == subject_id, Subject.user_id == current_user.id)
+        .first()
+    )
+    if not subject:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subject not found or does not belong to you",
+        )
+
+    try:
+        content_bytes = file.file.read()
+        text = content_bytes.decode("utf-8-sig")
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not read or decode CSV file as UTF-8",
+        )
+
+    reader = csv.DictReader(io.StringIO(text))
+    created_count = 0
+    skipped_count = 0
+    errors: List[dict] = []
+    created_items: List[Item] = []
+
+    # Map of existing tag names to Tag entities within this subject
+    existing_tags = {
+        t.name.lower(): t
+        for t in db.query(Tag).filter(Tag.subject_id == subject_id).all()
+    }
+
+    # CSV row counting: row 1 is header, data rows start at index 2
+    for row_idx, raw_row in enumerate(reader, start=2):
+        row = {
+            (k.strip().lower() if k else ""): (v.strip() if v else "")
+            for k, v in raw_row.items()
+        }
+
+        item_type = row.get("type", "").lower()
+        title = row.get("title", "")
+
+        # Validation
+        if not item_type or item_type not in ["problem", "qa"]:
+            errors.append({
+                "row": row_idx,
+                "reason": f"Invalid item type '{item_type}'. Must be 'problem' or 'qa'",
+            })
+            skipped_count += 1
+            continue
+
+        if not title:
+            errors.append({
+                "row": row_idx,
+                "reason": "Title is required",
+            })
+            skipped_count += 1
+            continue
+
+        prompt = row.get("prompt") or None
+        answer = row.get("answer") or None
+        url = row.get("url") or None
+        difficulty = row.get("difficulty") or None
+
+        # Process tags
+        tags_str = row.get("tags") or ""
+        tag_names = [t.strip().lower() for t in re.split(r"[,;]", tags_str) if t.strip()]
+        matched_tags: List[Tag] = []
+
+        for t_name in tag_names:
+            if t_name not in existing_tags:
+                new_tag = Tag(subject_id=subject_id, name=t_name)
+                db.add(new_tag)
+                db.flush()
+                existing_tags[t_name] = new_tag
+            matched_tags.append(existing_tags[t_name])
+
+        item = Item(
+            subject_id=subject_id,
+            type=item_type,
+            title=title,
+            prompt=prompt,
+            answer=answer,
+            url=url,
+            difficulty=difficulty,
+            tags=matched_tags,
+        )
+        db.add(item)
+        db.flush()
+
+        user_item = UserItem(
+            user_id=current_user.id,
+            item_id=item.id,
+            ease_factor=2.5,
+            interval_days=0,
+            repetitions=0,
+            next_review_date=date.today(),
+        )
+        db.add(user_item)
+        created_items.append(item)
+        created_count += 1
+
+    db.commit()
+
+    return {
+        "created": created_count,
+        "skipped": skipped_count,
+        "errors": errors,
+        "items": [serialize_item(it, current_user.id) for it in created_items],
+    }
 
 
 @router.get("/{item_id}", response_model=ItemRead, summary="Get item by ID")

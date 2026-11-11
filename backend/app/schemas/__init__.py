@@ -25,6 +25,8 @@ from app.schemas.item import (
     ItemUpdate,
     ItemRead,
     UserItemStateRead,
+    RowError,
+    ImportSummaryResponse,
 )
 
 __all__ = [
@@ -46,4 +48,6 @@ __all__ = [
     "ItemUpdate",
     "ItemRead",
     "UserItemStateRead",
+    "RowError",
+    "ImportSummaryResponse",
 ]
