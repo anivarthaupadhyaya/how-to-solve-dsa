@@ -31,6 +31,7 @@ import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { Skeleton } from '../components/ui/Skeleton'
 import { EmptyState } from '../components/ui/EmptyState'
+import { ActivityHeatmap } from '../components/ActivityHeatmap'
 
 // Animated Count-Up component
 function CountUp({ value, duration = 0.8, suffix = '', decimals = 0 }) {
@@ -288,6 +289,9 @@ export default function DashboardPage() {
           </p>
         </Card>
       </div>
+
+      {/* GitHub-style 52-Week Activity Heatmap */}
+      <ActivityHeatmap activity={activity} loading={loading} />
 
       {/* Weakest Tags Section with Recharts Horizontal Bar Chart */}
       <Card padding="p-6" className="space-y-4">
