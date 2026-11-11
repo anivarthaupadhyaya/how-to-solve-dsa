@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.limiter import limiter
 from app.routers.auth import router as auth_router
 from app.routers.items import router as items_router
+from app.routers.reviews import router as reviews_router
 from app.routers.subjects import router as subjects_router
 from app.routers.tags import router as tags_router
 
@@ -36,6 +37,7 @@ app.include_router(auth_router)
 app.include_router(subjects_router)
 app.include_router(items_router)
 app.include_router(tags_router)
+app.include_router(reviews_router)
 
 
 @app.get("/health", tags=["Health"])

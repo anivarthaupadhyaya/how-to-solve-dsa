@@ -28,6 +28,14 @@ from app.schemas.item import (
     RowError,
     ImportSummaryResponse,
 )
+from app.schemas.review import (
+    ReviewRating,
+    SubjectSimpleRead,
+    DueItemRead,
+    ReviewSubmission,
+    ReviewLogRead,
+    ReviewResultResponse,
+)
 
 __all__ = [
     "UserBase",
@@ -50,4 +58,10 @@ __all__ = [
     "UserItemStateRead",
     "RowError",
     "ImportSummaryResponse",
+    "ReviewRating",
+    "SubjectSimpleRead",
+    "DueItemRead",
+    "ReviewSubmission",
+    "ReviewLogRead",
+    "ReviewResultResponse",
 ]
