@@ -117,3 +117,34 @@ def test_analytics_ownership_isolation(
     # User B summary shows 0 items
     b_summary = client.get("/analytics/summary", headers=user_b_headers).json()
     assert b_summary["total_items"] == 0
+
+
+def test_activity_analytics_and_streaks(client: TestClient, user_a_headers: dict):
+    """Test 365-day activity timeline and streak tracking."""
+    # 1. No reviews yet
+    init_act = client.get("/analytics/activity", headers=user_a_headers).json()
+    assert init_act["current_streak"] == 0
+    assert init_act["longest_streak"] == 0
+    assert init_act["total_reviews_past_year"] == 0
+    assert len(init_act["activity"]) == 365
+
+    # 2. Add an item and review it today
+    sub_id = create_subject(client, user_a_headers, "Activity Sub")
+    item = client.post(
+        "/items",
+        json={"subject_id": sub_id, "type": "problem", "title": "Streak Item"},
+        headers=user_a_headers,
+    ).json()
+
+    due = client.get("/reviews/today", headers=user_a_headers).json()
+    ui_id = due[0]["user_item_id"]
+
+    client.post(f"/reviews/{ui_id}", json={"rating": "easy", "time_taken_seconds": 10}, headers=user_a_headers)
+
+    act_res = client.get("/analytics/activity", headers=user_a_headers).json()
+    assert act_res["current_streak"] == 1
+    assert act_res["longest_streak"] == 1
+    assert act_res["total_reviews_past_year"] == 1
+    # Today is the last entry in the 365-day timeline
+    assert act_res["activity"][-1]["count"] == 1
+

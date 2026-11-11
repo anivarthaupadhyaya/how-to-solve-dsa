@@ -39,6 +39,8 @@ from app.schemas.review import (
 from app.schemas.analytics import (
     TagAnalytics,
     AnalyticsSummary,
+    DailyActivity,
+    ActivityAnalytics,
 )
 
 __all__ = [
@@ -70,4 +72,6 @@ __all__ = [
     "ReviewResultResponse",
     "TagAnalytics",
     "AnalyticsSummary",
+    "DailyActivity",
+    "ActivityAnalytics",
 ]

@@ -21,3 +21,17 @@ class AnalyticsSummary(BaseModel):
     reviews_this_week: int = Field(..., description="Count of reviews completed in the past 7 days")
     retention_rate: float = Field(..., description="Overall share of successful reviews ('shaky' or 'easy', 0.0 to 1.0)")
     total_reviews: int = Field(..., description="Total count of reviews completed all-time")
+
+
+class DailyActivity(BaseModel):
+    """Daily review volume entry for heatmap charting."""
+    date: str = Field(..., description="Date formatted as YYYY-MM-DD")
+    count: int = Field(..., description="Number of card reviews completed on this date")
+
+
+class ActivityAnalytics(BaseModel):
+    """Activity tracking and study streaks."""
+    current_streak: int = Field(..., description="Current active streak in consecutive days")
+    longest_streak: int = Field(..., description="Longest historical review streak in consecutive days")
+    total_reviews_past_year: int = Field(..., description="Total review count over the past 365 days")
+    activity: List[DailyActivity] = Field(..., description="Daily review counts for the last 365 days")

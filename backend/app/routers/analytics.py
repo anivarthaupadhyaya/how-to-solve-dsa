@@ -13,7 +13,12 @@ from app.models.review import ReviewLog, UserItem
 from app.models.subject import Subject
 from app.models.tag import Tag, item_tags
 from app.models.user import User
-from app.schemas.analytics import AnalyticsSummary, TagAnalytics
+from app.schemas.analytics import (
+    ActivityAnalytics,
+    AnalyticsSummary,
+    DailyActivity,
+    TagAnalytics,
+)
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
@@ -184,3 +189,89 @@ def get_analytics_summary(
         retention_rate=retention_rate,
         total_reviews=total_reviews,
     )
+
+
+def compute_streaks(active_dates: set, today: date) -> tuple:
+    """Calculate current and longest active study streaks in consecutive calendar days."""
+    if not active_dates:
+        return 0, 0
+
+    sorted_dates = sorted(active_dates)
+
+    # 1. Longest streak calculation
+    longest = 1
+    current_run = 1
+    for i in range(1, len(sorted_dates)):
+        diff = (sorted_dates[i] - sorted_dates[i - 1]).days
+        if diff == 1:
+            current_run += 1
+            if current_run > longest:
+                longest = current_run
+        elif diff > 1:
+            current_run = 1
+
+    # 2. Current streak calculation
+    streak = 0
+    check_day = today
+    # If no reviews yet today, check if yesterday was active to preserve streak
+    if check_day not in active_dates:
+        check_day = today - timedelta(days=1)
+
+    while check_day in active_dates:
+        streak += 1
+        check_day -= timedelta(days=1)
+
+    return streak, longest
+
+
+@router.get(
+    "/activity",
+    response_model=ActivityAnalytics,
+    summary="Get daily review activity heatmap for the past 365 days and streaks",
+)
+def get_activity_analytics(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ActivityAnalytics:
+    """Return daily review count for the last 365 days, current streak, and longest streak."""
+    today = date.today()
+    cutoff_date = today - timedelta(days=364)
+
+    # Query all reviews for user
+    all_logs = (
+        db.query(ReviewLog.reviewed_at)
+        .join(UserItem, ReviewLog.user_item_id == UserItem.id)
+        .filter(UserItem.user_id == current_user.id)
+        .all()
+    )
+
+    active_dates = set()
+    date_counts = {}
+
+    for (rev_at,) in all_logs:
+        if rev_at:
+            rev_date = rev_at.date() if isinstance(rev_at, datetime) else rev_at
+            active_dates.add(rev_date)
+            d_str = rev_date.isoformat()
+            date_counts[d_str] = date_counts.get(d_str, 0) + 1
+
+    current_streak, longest_streak = compute_streaks(active_dates, today)
+
+    # Build 365-day array
+    activity_timeline: List[DailyActivity] = []
+    past_year_total = 0
+
+    for i in range(365):
+        day = cutoff_date + timedelta(days=i)
+        d_str = day.isoformat()
+        count = date_counts.get(d_str, 0)
+        past_year_total += count
+        activity_timeline.append(DailyActivity(date=d_str, count=count))
+
+    return ActivityAnalytics(
+        current_streak=current_streak,
+        longest_streak=longest_streak,
+        total_reviews_past_year=past_year_total,
+        activity=activity_timeline,
+    )
+
