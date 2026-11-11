@@ -7,6 +7,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.limiter import limiter
+from app.routers.analytics import router as analytics_router
 from app.routers.auth import router as auth_router
 from app.routers.items import router as items_router
 from app.routers.reviews import router as reviews_router
@@ -38,6 +39,7 @@ app.include_router(subjects_router)
 app.include_router(items_router)
 app.include_router(tags_router)
 app.include_router(reviews_router)
+app.include_router(analytics_router)
 
 
 @app.get("/health", tags=["Health"])

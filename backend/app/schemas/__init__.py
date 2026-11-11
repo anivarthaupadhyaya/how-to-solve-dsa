@@ -36,6 +36,10 @@ from app.schemas.review import (
     ReviewLogRead,
     ReviewResultResponse,
 )
+from app.schemas.analytics import (
+    TagAnalytics,
+    AnalyticsSummary,
+)
 
 __all__ = [
     "UserBase",
@@ -64,4 +68,6 @@ __all__ = [
     "ReviewSubmission",
     "ReviewLogRead",
     "ReviewResultResponse",
+    "TagAnalytics",
+    "AnalyticsSummary",
 ]
