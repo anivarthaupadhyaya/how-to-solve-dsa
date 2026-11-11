@@ -3,9 +3,22 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
+import { useAuth } from '../../context/AuthContext'
 
-export function AppLayout({ user, onLogout, subjects }) {
+export function AppLayout({ user: propUser, onLogout: propLogout, subjects }) {
   const location = useLocation()
+  let authUser = null
+  let authLogout = null
+  try {
+    const auth = useAuth()
+    authUser = auth.user
+    authLogout = auth.logout
+  } catch {
+    // Fallback if rendered outside AuthProvider
+  }
+
+  const user = propUser !== undefined ? propUser : authUser
+  const onLogout = propLogout !== undefined ? propLogout : authLogout
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
