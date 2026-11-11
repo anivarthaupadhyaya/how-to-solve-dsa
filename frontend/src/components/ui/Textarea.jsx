@@ -28,6 +28,8 @@ export const Textarea = forwardRef(function Textarea(
         ref={ref}
         id={textareaId}
         rows={rows}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${textareaId}-error` : helperText ? `${textareaId}-desc` : undefined}
         className={`w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:bg-slate-100 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 ${
           error
             ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 dark:border-rose-600'
@@ -35,9 +37,15 @@ export const Textarea = forwardRef(function Textarea(
         } ${className}`}
         {...props}
       />
-      {error && <p className="text-xs font-medium text-rose-500">{error}</p>}
+      {error && (
+        <p id={`${textareaId}-error`} className="text-xs font-medium text-rose-500">
+          {error}
+        </p>
+      )}
       {!error && helperText && (
-        <p className="text-xs text-slate-500 dark:text-slate-400">{helperText}</p>
+        <p id={`${textareaId}-desc`} className="text-xs text-slate-500 dark:text-slate-400">
+          {helperText}
+        </p>
       )}
     </div>
   )

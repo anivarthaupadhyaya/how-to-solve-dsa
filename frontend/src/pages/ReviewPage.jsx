@@ -14,6 +14,7 @@ import {
   Sparkles,
   BookOpen,
   Filter,
+  AlertTriangle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '../api/client'
@@ -36,6 +37,7 @@ export default function ReviewPage() {
   const [queue, setQueue] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [isFlipped, setIsFlipped] = useState(false)
   const [submittingRating, setSubmittingRating] = useState(false)
 
@@ -55,6 +57,7 @@ export default function ReviewPage() {
   // Fetch due cards today
   const fetchDueReviews = useCallback(async () => {
     setLoading(true)
+    setError(null)
     setIsFlipped(false)
     setCurrentIndex(0)
     setSessionCompleted(false)
@@ -67,8 +70,10 @@ export default function ReviewPage() {
       const dueCards = res.data || []
       setQueue(dueCards)
     } catch (err) {
+      const msg = err.response?.data?.detail || err.message || 'Failed to load review queue'
+      setError(msg)
       toast.error('Failed to load review queue', {
-        description: err.response?.data?.detail || err.message,
+        description: msg,
       })
     } finally {
       setLoading(false)
@@ -237,7 +242,26 @@ export default function ReviewPage() {
       </div>
 
       {/* Main Review Content */}
-      {loading ? (
+      {error && !loading ? (
+        <Card padding="p-8" className="text-center space-y-3 border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20">
+          <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto" />
+          <h3 className="font-bold text-sm text-rose-800 dark:text-rose-200">
+            Failed to load review queue
+          </h3>
+          <p className="text-xs text-rose-600 dark:text-rose-400 max-w-md mx-auto">
+            {error}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={RotateCw}
+            onClick={fetchDueReviews}
+            className="shadow-2xs"
+          >
+            Retry Connection
+          </Button>
+        </Card>
+      ) : loading ? (
         <Card padding="p-8" className="space-y-6">
           <div className="flex justify-between items-center">
             <Skeleton className="h-4 w-28" />
@@ -525,7 +549,8 @@ export default function ReviewPage() {
                       type="button"
                       disabled={submittingRating}
                       onClick={() => handleRate('forgot')}
-                      className="flex flex-col items-center justify-center p-3 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-700 dark:text-rose-300 font-bold text-xs transition-all hover:scale-102 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                      aria-label="Rate recall as forgot (shortcut: 1)"
+                      className="flex flex-col items-center justify-center p-3 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-700 dark:text-rose-300 font-bold text-xs transition-all hover:scale-102 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
                     >
                       <span>Forgot</span>
                       <span className="text-[10px] font-normal opacity-70 mt-0.5">
@@ -538,7 +563,8 @@ export default function ReviewPage() {
                       type="button"
                       disabled={submittingRating}
                       onClick={() => handleRate('shaky')}
-                      className="flex flex-col items-center justify-center p-3 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 text-amber-700 dark:text-amber-300 font-bold text-xs transition-all hover:scale-102 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      aria-label="Rate recall as shaky (shortcut: 2)"
+                      className="flex flex-col items-center justify-center p-3 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 text-amber-700 dark:text-amber-300 font-bold text-xs transition-all hover:scale-102 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                     >
                       <span>Shaky</span>
                       <span className="text-[10px] font-normal opacity-70 mt-0.5">
@@ -551,7 +577,8 @@ export default function ReviewPage() {
                       type="button"
                       disabled={submittingRating}
                       onClick={() => handleRate('easy')}
-                      className="flex flex-col items-center justify-center p-3 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold text-xs transition-all hover:scale-102 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      aria-label="Rate recall as easy (shortcut: 3)"
+                      className="flex flex-col items-center justify-center p-3 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold text-xs transition-all hover:scale-102 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                     >
                       <span>Easy</span>
                       <span className="text-[10px] font-normal opacity-70 mt-0.5">

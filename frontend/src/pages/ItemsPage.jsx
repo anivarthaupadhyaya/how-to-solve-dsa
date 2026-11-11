@@ -40,6 +40,7 @@ export default function ItemsPage() {
   // Items and loading states
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   // Filter state
   const initialSubject = searchParams.get('subject_id') || ''
@@ -78,6 +79,7 @@ export default function ItemsPage() {
   // Fetch items based on active filters
   const fetchItems = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const params = {}
       if (selectedSubject) params.subject_id = selectedSubject
@@ -87,8 +89,10 @@ export default function ItemsPage() {
       const res = await api.get('/items', { params })
       setItems(res.data || [])
     } catch (err) {
+      const msg = err.response?.data?.detail || err.message || 'Failed to load study items'
+      setError(msg)
       toast.error('Failed to load study items', {
-        description: err.response?.data?.detail || err.message,
+        description: msg,
       })
     } finally {
       setLoading(false)
@@ -448,7 +452,26 @@ export default function ItemsPage() {
       </Card>
 
       {/* Items List */}
-      {loading ? (
+      {error && !loading ? (
+        <Card padding="p-8" className="text-center space-y-3 border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20">
+          <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto" />
+          <h3 className="font-bold text-sm text-rose-800 dark:text-rose-200">
+            Failed to load study cards
+          </h3>
+          <p className="text-xs text-rose-600 dark:text-rose-400 max-w-md mx-auto">
+            {error}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={RotateCcw}
+            onClick={fetchItems}
+            className="shadow-2xs"
+          >
+            Retry Connection
+          </Button>
+        </Card>
+      ) : loading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4].map((n) => (
             <Card key={n} padding="p-5" className="space-y-3">

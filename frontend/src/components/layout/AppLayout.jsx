@@ -37,7 +37,7 @@ export function AppLayout({ user: propUser, onLogout: propLogout, subjects }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="flex-1 p-4 sm:p-8 max-w-7xl w-full mx-auto pb-24 md:pb-12"
+            className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24 md:pb-12 min-w-0"
           >
             <Outlet />
           </motion.main>

@@ -9,15 +9,19 @@ export function SubjectsProvider({ children }) {
   const [subjects, setSubjects] = useState([])
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   const refreshData = useCallback(async () => {
     if (!isAuthenticated) {
       setSubjects([])
       setItems([])
       setLoading(false)
+      setError(null)
       return
     }
 
+    setLoading(true)
+    setError(null)
     try {
       const [subjectsRes, itemsRes] = await Promise.all([
         api.get('/subjects'),
@@ -27,6 +31,7 @@ export function SubjectsProvider({ children }) {
       setItems(itemsRes.data || [])
     } catch (err) {
       console.error('Failed to load subjects or items:', err)
+      setError(err.response?.data?.detail || err.message || 'Failed to load data')
     } finally {
       setLoading(false)
     }
@@ -57,6 +62,7 @@ export function SubjectsProvider({ children }) {
     subjects,
     items,
     loading,
+    error,
     refreshData,
     createSubject,
     updateSubject,

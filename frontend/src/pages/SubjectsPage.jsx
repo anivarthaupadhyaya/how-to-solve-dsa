@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   FolderPlus,
   Check,
+  RotateCcw,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSubjects } from '../context/SubjectsContext'
@@ -36,8 +37,16 @@ const PRESET_COLORS = [
 ]
 
 export default function SubjectsPage() {
-  const { subjects, items, loading, createSubject, updateSubject, deleteSubject } =
-    useSubjects()
+  const {
+    subjects,
+    items,
+    loading,
+    error,
+    refreshData,
+    createSubject,
+    updateSubject,
+    deleteSubject,
+  } = useSubjects()
 
   // Modal states
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -185,7 +194,26 @@ export default function SubjectsPage() {
       </div>
 
       {/* Main Content Area */}
-      {loading ? (
+      {error && !loading ? (
+        <Card padding="p-8" className="text-center space-y-3 border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20">
+          <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto" />
+          <h3 className="font-bold text-sm text-rose-800 dark:text-rose-200">
+            Failed to load study subjects
+          </h3>
+          <p className="text-xs text-rose-600 dark:text-rose-400 max-w-md mx-auto">
+            {error}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={RotateCcw}
+            onClick={refreshData}
+            className="shadow-2xs"
+          >
+            Retry Connection
+          </Button>
+        </Card>
+      ) : loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((n) => (
             <div

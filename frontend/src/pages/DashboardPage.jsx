@@ -13,6 +13,7 @@ import {
   BarChart3,
   CalendarClock,
   Sparkles,
+  RotateCcw,
 } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -111,10 +112,12 @@ export default function DashboardPage() {
   const [activity, setActivity] = useState(null)
   const [tags, setTags] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   // Fetch summary, activity streak, and weak tags
   const fetchDashboardData = useCallback(async () => {
     setLoading(true)
+    setError(null)
     try {
       const params = {}
       if (selectedSubject) {
@@ -132,8 +135,10 @@ export default function DashboardPage() {
       setTags(tagRes.data || [])
     } catch (err) {
       console.error('Failed to load dashboard data:', err)
+      const msg = err.response?.data?.detail || err.message || 'Failed to load analytics'
+      setError(msg)
       toast.error('Failed to load analytics', {
-        description: err.response?.data?.detail || err.message,
+        description: msg,
       })
     } finally {
       setLoading(false)
@@ -192,6 +197,28 @@ export default function DashboardPage() {
           </select>
         </div>
       </div>
+
+      {/* Error Retry Banner */}
+      {error && !loading && (
+        <Card padding="p-6" className="text-center space-y-3 border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20">
+          <AlertCircle className="w-8 h-8 text-rose-500 mx-auto" />
+          <h3 className="font-bold text-sm text-rose-800 dark:text-rose-200">
+            Failed to load dashboard metrics
+          </h3>
+          <p className="text-xs text-rose-600 dark:text-rose-400 max-w-md mx-auto">
+            {error}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={RotateCcw}
+            onClick={fetchDashboardData}
+            className="shadow-2xs"
+          >
+            Retry Connection
+          </Button>
+        </Card>
+      )}
 
       {/* 4 Stat Cards with Count-Up Animations */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

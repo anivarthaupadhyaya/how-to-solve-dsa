@@ -49,6 +49,9 @@ export function Modal({
 
           {/* Modal Panel */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? 'modal-title' : undefined}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -59,7 +62,10 @@ export function Modal({
             <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-slate-800/80">
               <div>
                 {title && (
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  <h3
+                    id="modal-title"
+                    className="text-lg font-bold text-slate-900 dark:text-slate-100"
+                  >
                     {title}
                   </h3>
                 )}
@@ -72,7 +78,8 @@ export function Modal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Close dialog"
+                className="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <X className="w-5 h-5" />
               </button>
