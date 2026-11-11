@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   RotateCcw,
   Sparkles,
+  UploadCloud,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '../api/client'
@@ -30,6 +31,7 @@ import { Modal } from '../components/ui/Modal'
 import { Badge, TagChip } from '../components/ui/Badge'
 import { Skeleton } from '../components/ui/Skeleton'
 import { EmptyState } from '../components/ui/EmptyState'
+import { ImportCsvModal } from '../components/ImportCsvModal'
 
 export default function ItemsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -48,6 +50,7 @@ export default function ItemsPage() {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isImportOpen, setIsImportOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [formSubmitting, setFormSubmitting] = useState(false)
   const [formErrors, setFormErrors] = useState({})
@@ -342,6 +345,14 @@ export default function ItemsPage() {
         </div>
 
         <div className="flex items-center gap-2.5">
+          <Button
+            variant="secondary"
+            icon={UploadCloud}
+            onClick={() => setIsImportOpen(true)}
+            className="shadow-soft"
+          >
+            Import CSV
+          </Button>
           <Button
             variant="primary"
             icon={Plus}
@@ -889,6 +900,18 @@ export default function ItemsPage() {
           </div>
         </div>
       </Modal>
+
+      {/* CSV Import Modal */}
+      <ImportCsvModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        subjects={subjects}
+        defaultSubjectId={selectedSubject}
+        onImportSuccess={() => {
+          fetchItems()
+          refreshGlobalData()
+        }}
+      />
     </div>
   )
 }
