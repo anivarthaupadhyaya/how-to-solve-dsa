@@ -8,7 +8,7 @@ A **spaced-repetition study app** for technical interview prep — DSA, OS, Comp
 
 ## ✨ Features
 
-- **Subjects** — Organize study material by topic with custom colours.
+- **Subjects** — Organize study material by topic with custom colours. 
 - **Items** — Two types: **Q&A flashcards** (question + answer) and **coding problems** (title, URL, difficulty).
 - **Tags** — Label items (e.g. "linked-list", "medium") and filter by tag.
 - **SM-2 Spaced Repetition** — Rate each review as _Forgot_, _Shaky_, or _Easy_; the algorithm adjusts the next review date and ease factor automatically.
