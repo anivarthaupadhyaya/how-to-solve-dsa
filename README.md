@@ -5,7 +5,6 @@
 A **spaced-repetition study app** for technical interview prep — DSA, OS, Computer Networks, and DBMS. Built with the **SM-2 algorithm** to schedule reviews at optimal intervals, so you remember more and study less.
 
 ---
-
 ## ✨ Features
 
 
